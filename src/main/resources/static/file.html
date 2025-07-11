@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Upload & Query</title>
+</head>
+<body>
+<h1>文件管理测试</h1>
+
+<h2>上传文件</h2>
+<form id="uploadForm">
+    文件名: <input type="text" id="name"><br>
+    路径: <input type="text" id="path"><br>
+    大小: <input type="number" id="size"><br>
+    是否为目录:
+    <select id="isDirectory">
+        <option value="false">否</option>
+        <option value="true">是</option>
+    </select><br>
+    <button type="submit">上传</button>
+</form>
+
+<h2>根据路径查找文件</h2>
+<input type="text" id="queryPath" placeholder="请输入路径">
+<button onclick="findFile()">查找</button>
+
+<h3>响应结果：</h3>
+<pre id="responseOutput"></pre>
+
+<script>
+    const output = document.getElementById('responseOutput');
+
+    document.getElementById('uploadForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const data = {
+            name: document.getElementById('name').value,
+            path: document.getElementById('path').value,
+            size: parseInt(document.getElementById('size').value),
+            isDirectory: document.getElementById('isDirectory').value === "true"
+        };
+
+        fetch('/file/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(json => {
+                output.innerText = JSON.stringify(json, null, 2);
+            })
+            .catch(err => {
+                output.innerText = '错误: ' + err;
+            });
+    });
+
+    function findFile() {
+        const path = document.getElementById('queryPath').value;
+        fetch(`/file/find?path=${encodeURIComponent(path)}`)
+            .then(res => res.json())
+            .then(json => {
+                output.innerText = JSON.stringify(json, null, 2);
+            })
+            .catch(err => {
+                output.innerText = '错误: ' + err;
+            });
+    }
+</script>
+</body>
+</html>
